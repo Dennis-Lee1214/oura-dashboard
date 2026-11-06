@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oura 数据面板</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --border: rgba(11,11,11,0.10);
+  --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+  --demo-bg: #fdf3e7; --demo-ink: #8a4b00;
+  --real-bg: #e8f4ec; --real-ink: #006300;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --border: rgba(255,255,255,0.10);
+    --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --demo-bg: #3a2a14; --demo-ink: #f4b766;
+    --real-bg: #16301d; --real-ink: #5fd35f;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --border: rgba(255,255,255,0.10);
+  --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+  --demo-bg: #3a2a14; --demo-ink: #f4b766;
+  --real-bg: #16301d; --real-ink: #5fd35f;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--page); color: var(--ink);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+header { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+h1 { font-size: 22px; margin: 0; letter-spacing: 0.01em; }
+.sub { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; color: var(--ink-2); padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button[aria-pressed="true"] { color: var(--ink); font-weight: 600; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.badge { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+.badge.demo { background: var(--demo-bg); color: var(--demo-ink); }
+.badge.real { background: var(--real-bg); color: var(--real-ink); }
+.note { background: var(--demo-bg); color: var(--demo-ink); border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
+.note.hidden { display: none; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tile, .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.tile { padding: 14px 16px; }
+.tile .k { color: var(--ink-2); font-size: 13px; }
+.tile .v { font-size: 28px; font-weight: 650; margin-top: 2px; }
+.tile .d { color: var(--muted); font-size: 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 16px; }
+.card { padding: 16px 16px 12px; min-width: 0; }
+.card.wide { grid-column: 1 / -1; }
+.card h2 { font-size: 15px; margin: 0; }
+.card .desc { color: var(--ink-2); font-size: 12.5px; margin: 2px 0 8px; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); margin-bottom: 4px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.chart .lbl { fill: var(--ink-2); font-size: 11.5px; }
+.tip {
+  position: absolute; pointer-events: none; z-index: 5; min-width: 120px;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); padding: 8px 10px; font-size: 12.5px; line-height: 1.45;
+  opacity: 0; white-space: nowrap;
+}
+.tip b { display: block; margin-bottom: 2px; }
+.tip i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+.tip span.n { float: right; margin-left: 14px; font-variant-numeric: tabular-nums; }
+details { margin-top: 16px; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 13px; }
+.tablewrap { overflow-x: auto; margin-top: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+th, td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--ink-2); font-weight: 600; }
+footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
+.empty { color: var(--muted); font-size: 13px; padding: 40px 0; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Oura 数据面板</h1>
+      <div class="sub" id="sub">加载中…</div>
+    </div>
+    <div class="controls">
+      <span class="badge" id="badge"></span>
+      <div class="seg" id="range" role="group" aria-label="时间范围">
+        <button data-days="7">7 天</button>
+        <button data-days="30" aria-pressed="true">30 天</button>
+        <button data-days="90">90 天</button>
+      </div>
+      <div class="seg" id="source" role="group" aria-label="数据来源">
+        <button data-src="demo">演示</button>
+        <button data-src="real">真实</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="note hidden" id="note"></div>
+
+  <section class="tiles" id="tiles"></section>
+
+  <section class="grid">
+    <div class="card wide">
+      <h2>三项分数</h2>
+      <p class="desc">睡眠、准备度、活动分数的每日变化</p>
+      <div class="legend" id="lg-scores"></div>
+      <div class="chart" id="c-scores"></div>
+    </div>
+    <div class="card">
+      <h2>睡眠时长与阶段</h2>
+      <p class="desc">每晚深睡、REM、浅睡的小时数</p>
+      <div class="legend" id="lg-stages"></div>
+      <div class="chart" id="c-stages"></div>
+    </div>
+    <div class="card">
+      <h2>入睡时间 vs 准备度</h2>
+      <p class="desc">每个点是一晚：横轴入睡时间，纵轴第二天准备度</p>
+      <div class="chart" id="c-bedtime"></div>
+    </div>
+    <div class="card">
+      <h2>夜间 HRV</h2>
+      <p class="desc">平均心率变异性（ms），越高通常恢复越好</p>
+      <div class="chart" id="c-hrv"></div>
+    </div>
+    <div class="card">
+      <h2>最低静息心率</h2>
+      <p class="desc">夜间最低心率（bpm）</p>
+      <div class="chart" id="c-rhr"></div>
+    </div>
+    <div class="card">
+      <h2>步数</h2>
+      <p class="desc">每日步数</p>
+      <div class="chart" id="c-steps"></div>
+    </div>
+    <div class="card">
+      <h2>压力与恢复</h2>
+      <p class="desc">每天处于高压力 / 恢复状态的分钟数</p>
+      <div class="legend" id="lg-stress"></div>
+      <div class="chart" id="c-stress"></div>
+    </div>
+  </section>
+
+  <details>
+    <summary>查看数据表</summary>
+    <div class="tablewrap"><table id="table"></table></div>
+  </details>
+
+  <footer id="footer"></footer>
+</main>
+
+<script>
+"use strict";
+const TYPES = ["daily_sleep", "sleep", "daily_readiness", "daily_activity", "daily_stress", "meta"];
+const isLocal = ["localhost", "127.0.0.1", "[::1]", ""].includes(location.hostname);
+const state = { days: 30, src: null, data: null };
+const $ = (id) => document.getElementById(id);
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ---------- 数据加载 ---------- */
+async function loadSource(src) {
+  const out = {};
+  for (const t of TYPES) {
+    const r = await fetch(`data/${src}/${t}.json`, { cache: "no-store" });
+    if (!r.ok) throw new Error(`${src}/${t}.json 不存在`);
+    out[t] = await r.json();
+  }
+  return out;
+}
+
+function buildDays(raw) {
+  const byDay = new Map();
+  const get = (d) => { if (!byDay.has(d)) byDay.set(d, { day: d }); return byDay.get(d); };
+  for (const r of raw.daily_sleep) get(r.day).sleepScore = r.score;
+  for (const r of raw.daily_readiness) { const o = get(r.day); o.ready = r.score; o.temp = r.temperature_deviation; }
+  for (const r of raw.daily_activity) { const o = get(r.day); o.act = r.score; o.steps = r.steps; }
+  for (const r of raw.daily_stress) { const o = get(r.day); o.stress = r.stress_high / 60; o.recovery = r.recovery_high / 60; }
+  // 每天只取最长的一段睡眠（排除小睡）
+  const best = new Map();
+  for (const s of raw.sleep) {
+    if (s.type && !["long_sleep", "sleep"].includes(s.type)) continue;
+    const prev = best.get(s.day);
+    if (!prev || (s.total_sleep_duration || 0) > (prev.total_sleep_duration || 0)) best.set(s.day, s);
+  }
+  for (const [d, s] of best) {
+    const o = get(d);
+    o.total = s.total_sleep_duration / 3600;
+    o.deep = s.deep_sleep_duration / 3600;
+    o.rem = s.rem_sleep_duration / 3600;
+    o.light = s.light_sleep_duration / 3600;
+    o.hrv = s.average_hrv; o.rhr = s.lowest_heart_rate;
+    if (s.bedtime_start) {
+      // 直接读字符串里的本地时间，避免浏览器时区换算
+      const [h, m] = s.bedtime_start.slice(11, 16).split(":").map(Number);
+      o.bed = (h < 12 ? h + 24 : h) * 60 + m; // 18:00 之后的分钟数轴：0 点记作 24:00
+    }
+  }
+  return [...byDay.values()].sort((a, b) => a.day.localeCompare(b.day));
+}
+
+/* ---------- 格式化 ---------- */
+const fmtDay = (d) => `${+d.slice(5, 7)}/${+d.slice(8, 10)}`;
+const fmtHM = (h) => { if (h == null) return "–"; const m = Math.round(h * 60); return `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}`; };
+const fmtClock = (mins) => { if (mins == null) return "–"; const t = Math.round(mins) % 1440; return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`; };
+const fmtInt = (v) => v == null ? "–" : Math.round(v).toLocaleString("zh-CN");
+const avg = (arr) => { const v = arr.filter((x) => x != null && !isNaN(x)); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+
+/* ---------- 图表基础 ---------- */
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function niceTicks(min, max, n = 4) {
+  const span = max - min || 1;
+  const step0 = span / n, mag = 10 ** Math.floor(Math.log10(step0));
+  const step = [1, 2, 2.5, 5, 10].map((s) => s * mag).find((s) => s >= step0);
+  const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step;
+  const t = []; for (let v = lo; v <= hi + step / 2; v += step) t.push(+v.toFixed(6));
+  return t;
+}
+function frame(host, { h = 220, yMin, yMax, yFmt = (v) => v, ticks }) {
+  host.innerHTML = "";
+  const W = Math.max(host.clientWidth, 280), H = h, m = { l: 40, r: 12, t: 10, b: 24 };
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" }, host);
+  const tip = document.createElement("div"); tip.className = "tip"; host.appendChild(tip);
+  const yt = ticks || niceTicks(yMin, yMax);
+  const y0 = yt[0], y1 = yt[yt.length - 1];
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const y = (v) => m.t + ih - ((v - y0) / (y1 - y0)) * ih;
+  for (const v of yt) {
+    el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: v === y0 ? css("--axis") : css("--grid"), "stroke-width": 1 }, svg);
+    const t = el("text", { x: m.l - 6, y: y(v) + 3.5, "text-anchor": "end" }, svg); t.textContent = yFmt(v);
+  }
+  return { svg, tip, W, H, m, iw, ih, y, host };
+}
+function xLabels(f, days, xAt) {
+  const n = days.length, every = Math.max(1, Math.ceil(n / Math.floor(f.iw / 52)));
+  days.forEach((d, i) => {
+    if ((n - 1 - i) % every) return;
+    const t = el("text", { x: xAt(i), y: f.H - 6, "text-anchor": "middle" }, f.svg); t.textContent = fmtDay(d.day);
+  });
+}
+function showTip(f, html, px, py) {
+  f.tip.innerHTML = html; f.tip.style.opacity = 1;
+  const tw = f.tip.offsetWidth, hostW = f.host.clientWidth, scale = hostW / f.W;
+  let left = px * scale + 12; if (left + tw > hostW) left = px * scale - tw - 12;
+  f.tip.style.left = Math.max(0, left) + "px"; f.tip.style.top = Math.max(0, py * scale - 10) + "px";
+}
+const hideTip = (f) => { f.tip.style.opacity = 0; };
+const row = (color, name, val) => `<div>${color ? `<i style="background:${color}"></i>` : ""}${name}<span class="n">${val}</span></div>`;
+function legend(id, items) { $(id).innerHTML = items.map(([c, n]) => `<span><i style="background:${c}"></i>${n}</span>`).join(""); }
+function emptyChart(host) { host.innerHTML = `<div class="empty">这个时间段还没有数据</div>`; }
+
+/* 折线图：series = [{name, color, key, fmt}] */
+function lineChart(host, days, series, opts) {
+  const vals = days.flatMap((d) => series.map((s) => d[s.key])).filter((v) => v != null);
+  if (!vals.length) return emptyChart(host);
+  const f = frame(host, { yMin: opts.yMin ?? Math.min(...vals), yMax: opts.yMax ?? Math.max(...vals), ...opts });
+  const step = days.length > 1 ? f.iw / (days.length - 1) : 0;
+  const x = (i) => f.m.l + (days.length > 1 ? i * step : f.iw / 2);
+  xLabels(f, days, x);
+  for (const s of series) {
+    let dStr = "", pen = false;
+    days.forEach((d, i) => {
+      const v = d[s.key];
+      if (v == null) { pen = false; return; }
+      dStr += `${pen ? "L" : "M"}${x(i).toFixed(1)},${f.y(v).toFixed(1)}`; pen = true;
+    });
+    el("path", { d: dStr, fill: "none", stroke: s.color, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, f.svg);
+    if (days.length <= 31) days.forEach((d, i) => { if (d[s.key] != null) el("circle", { cx: x(i), cy: f.y(d[s.key]), r: 2.5, fill: s.color }, f.svg); });
+  }
+  // 交互：十字线 + 提示
+  const cross = el("line", { y1: f.m.t, y2: f.m.t + f.ih, stroke: css("--axis"), "stroke-width": 1, opacity: 0 }, f.svg);
+  const dots = series.map((s) => el("circle", { r: 4.5, fill: s.color, stroke: css("--surface"), "stroke-width": 2, opacity: 0 }, f.svg));
+  const hit = el("rect", { x: f.m.l - 6, y: 0, width: f.iw + 12, height: f.H, fill: "transparent" }, f.svg);
+  const move = (ev) => {
+    const r = f.svg.getBoundingClientRect(), px = (ev.clientX - r.left) * (f.W / r.width);
+    const i = Math.max(0, Math.min(days.length - 1, Math.round((px - f.m.l) / (step || 1))));
+    const d = days[i];
+    cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("opacity", 1);
+    series.forEach((s, k) => {
+      const v = d[s.key];
+      dots[k].setAttribute("opacity", v == null ? 0 : 1);
+      if (v != null) { dots[k].setAttribute("cx", x(i)); dots[k].setAttribute("cy", f.y(v)); }
+    });
+    showTip(f, `<b>${d.day}</b>` + series.map((s) => row(series.length > 1 ? s.color : null, s.name, d[s.key] == null ? "–" : (s.fmt || fmtInt)(d[s.key]))).join(""), x(i), f.m.t + 10);
+  };
+  hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move);
+  hit.addEventListener("pointerleave", () => { cross.setAttribute("opacity", 0); dots.forEach((c) => c.setAttribute("opacity", 0)); hideTip(f); });
+}
+
+/* 柱状图：stack=true 时堆叠，否则并列 */
+function barChart(host, days, series, opts) {
+  const tot = days.map((d) => opts.stack ? series.reduce((a, s) => a + (d[s.key] || 0), 0) : Math.max(0, ...series.map((s) => d[s.key] || 0)));
+  if (!days.some((d) => series.some((s) => d[s.key] != null))) return emptyChart(host);
+  const f = frame(host, { yMin: 0, yMax: Math.max(...tot) * 1.05, ...opts });
+  const slot = f.iw / days.length, gap = 2;
+  const groupW = Math.min(28, Math.max(2, slot * 0.72));
+  const x = (i) => f.m.l + slot * (i + 0.5);
+  xLabels(f, days, x);
+  const r = Math.min(4, groupW / 4);
+  days.forEach((d, i) => {
+    if (opts.stack) {
+      let base = 0;
+      const live = series.filter((s) => d[s.key]);
+      live.forEach((s, k) => {
+        const v = d[s.key], yTop = f.y(base + v), yBot = f.y(base);
+        const top = k === live.length - 1;
+        const hgt = Math.max(0, yBot - yTop - (k > 0 ? gap : 0));
+        bar(f.svg, x(i) - groupW / 2, yTop, groupW, hgt, top ? r : 0, s.color);
+        base += v;
+      });
+    } else {
+      const bw = Math.max(1.5, (groupW - gap * (series.length - 1)) / series.length);
+      series.forEach((s, k) => {
+        const v = d[s.key]; if (v == null) return;
+        const bx = x(i) - groupW / 2 + k * (bw + gap);
+        bar(f.svg, bx, f.y(v), bw, f.y(0) - f.y(v), Math.min(r, bw / 2), s.color);
+      });
+    }
+  });
+  // 交互：整列命中区
+  const hl = el("rect", { y: f.m.t, height: f.ih, fill: css("--ink"), opacity: 0 }, f.svg);
+  f.svg.insertBefore(hl, f.svg.firstChild.nextSibling);
+  days.forEach((d, i) => {
+    const h = el("rect", { x: f.m.l + slot * i, y: 0, width: slot, height: f.H, fill: "transparent" }, f.svg);
+    const on = () => {
+      hl.setAttribute("x", f.m.l + slot * i); hl.setAttribute("width", slot); hl.setAttribute("opacity", 0.05);
+      let html = `<b>${d.day}</b>` + series.map((s) => row(series.length > 1 ? s.color : null, s.name, d[s.key] == null ? "–" : (s.fmt || fmtInt)(d[s.key]))).join("");
+      if (opts.totalFmt) html += row(null, "合计", opts.totalFmt(tot[i]));
+      showTip(f, html, x(i), f.m.t + 10);
+    };
+    h.addEventListener("pointerenter", on); h.addEventListener("pointerdown", on);
+    h.addEventListener("pointerleave", () => { hl.setAttribute("opacity", 0); hideTip(f); });
+  });
+}
+function bar(svg, x, y, w, h, r, fill) {
+  if (h <= 0) return;
+  r = Math.min(r, h, w / 2);
+  // 只有顶端圆角，底部贴住基线
+  const d = `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+  el("path", { d, fill }, svg);
+}
+
+/* 散点图 */
+function scatterChart(host, pts, opts) {
+  if (!pts.length) return emptyChart(host);
+  const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+  const f = frame(host, { yMin: Math.min(...ys) - 3, yMax: Math.max(...ys) + 3, ...opts });
+  const xt = [];
+  const x0 = Math.floor((Math.min(...xs) - 15) / 60) * 60, x1 = Math.ceil((Math.max(...xs) + 15) / 60) * 60;
+  for (let v = x0; v <= x1; v += 60) xt.push(v);
+  const x = (v) => f.m.l + ((v - x0) / (x1 - x0 || 1)) * f.iw;
+  const every = Math.ceil(xt.length / Math.floor(f.iw / 50));
+  xt.forEach((v, i) => {
+    if (i % every) return;
+    el("line", { x1: x(v), x2: x(v), y1: f.m.t, y2: f.m.t + f.ih, stroke: css("--grid") }, f.svg);
+    const t = el("text", { x: x(v), y: f.H - 6, "text-anchor": "middle" }, f.svg); t.textContent = fmtClock(v);
+  });
+  // 趋势线（最小二乘）
+  if (pts.length >= 5) {
+    const mx = avg(xs), my = avg(ys);
+    const b = pts.reduce((a, p) => a + (p.x - mx) * (p.y - my), 0) / (pts.reduce((a, p) => a + (p.x - mx) ** 2, 0) || 1);
+    const a = my - b * mx;
+    el("line", { x1: x(x0), y1: f.y(a + b * x0), x2: x(x1), y2: f.y(a + b * x1), stroke: css("--ink-2"), "stroke-width": 1.5, "stroke-dasharray": "4 4", opacity: 0.7 }, f.svg);
+    const perHour = b * 60;
+    const t = el("text", { x: f.W - f.m.r, y: f.m.t + 12, "text-anchor": "end", class: "lbl" }, f.svg);
+    t.textContent = `入睡每晚 1 小时，准备度约 ${perHour >= 0 ? "+" : "−"}${Math.abs(perHour).toFixed(1)}`;
+  }
+  for (const p of pts) {
+    const c = el("circle", { cx: x(p.x), cy: f.y(p.y), r: 4.5, fill: opts.color, stroke: css("--surface"), "stroke-width": 1.5, "fill-opacity": 0.85 }, f.svg);
+    const hit = el("circle", { cx: x(p.x), cy: f.y(p.y), r: 11, fill: "transparent" }, f.svg);
+    const on = () => { c.setAttribute("r", 6.5); showTip(f, `<b>${p.day}</b>` + row(null, "入睡", fmtClock(p.x)) + row(null, "准备度", p.y), x(p.x), f.y(p.y)); };
+    hit.addEventListener("pointerenter", on); hit.addEventListener("pointerdown", on);
+    hit.addEventListener("pointerleave", () => { c.setAttribute("r", 4.5); hideTip(f); });
+  }
+}
+
+/* ---------- 渲染 ---------- */
+function render() {
+  const all = state.data.days;
+  const days = all.slice(-state.days);
+  const prev = all.slice(-state.days * 2, -state.days);
+  const S1 = css("--s1"), S2 = css("--s2"), S3 = css("--s3");
+
+  // 数据量提示
+  const note = $("note");
+  if (!all.length) { note.textContent = "还没有任何数据。戴着戒指睡一晚，同步后重新运行 fetch_oura.py。"; note.classList.remove("hidden"); }
+  else if (state.src === "real" && all.length < 14) { note.textContent = `目前只有 ${all.length} 天数据。准备度、HRV 等指标需要一到两周建立基线，趋势会越来越准。`; note.classList.remove("hidden"); }
+  else if (state.src === "demo" && state.missingReal && isLocal) { note.textContent = "没有找到真实数据，先显示演示数据。在项目目录运行 python3 scripts/fetch_oura.py 后刷新页面。"; note.classList.remove("hidden"); }
+  else note.classList.add("hidden");
+
+  // 指标卡
+  const tiles = [
+    ["平均睡眠分数", "sleepScore", fmtInt],
+    ["平均准备度", "ready", fmtInt],
+    ["平均睡眠时长", "total", fmtHM],
+    ["平均入睡时间", "bed", fmtClock],
+    ["日均步数", "steps", fmtInt],
+  ];
+  $("tiles").innerHTML = tiles.map(([k, key, fmt]) => {
+    const cur = avg(days.map((d) => d[key])), old = avg(prev.map((d) => d[key]));
+    let delta = "";
+    if (cur != null && old != null && prev.length >= state.days / 2) {
+      const diff = cur - old;
+      delta = key === "total" ? `${diff >= 0 ? "+" : "−"}${fmtHM(Math.abs(diff))}`
+        : key === "bed" ? `${diff >= 0 ? "晚" : "早"} ${Math.round(Math.abs(diff))} 分钟`
+        : `${diff >= 0 ? "+" : "−"}${fmtInt(Math.abs(diff))}`;
+      delta = `比前 ${state.days} 天 ${delta}`;
+    }
+    return `<div class="tile"><div class="k">${k}</div><div class="v">${fmt(cur)}</div><div class="d">${delta || "&nbsp;"}</div></div>`;
+  }).join("");
+
+  legend("lg-scores", [[S1, "睡眠"], [S2, "准备度"], [S3, "活动"]]);
+  lineChart($("c-scores"), days, [
+    { name: "睡眠", key: "sleepScore", color: S1 },
+    { name: "准备度", key: "ready", color: S2 },
+    { name: "活动", key: "act", color: S3 },
+  ], { yMin: 40, yMax: 100, ticks: [40, 60, 80, 100], h: 240 });
+
+  legend("lg-stages", [[S1, "深睡"], [S2, "REM"], [S3, "浅睡"]]);
+  barChart($("c-stages"), days, [
+    { name: "深睡", key: "deep", color: S1, fmt: fmtHM },
+    { name: "REM", key: "rem", color: S2, fmt: fmtHM },
+    { name: "浅睡", key: "light", color: S3, fmt: fmtHM },
+  ], { stack: true, yFmt: (v) => v + "h", totalFmt: fmtHM });
+
+  const pts = days.filter((d) => d.bed != null && d.ready != null).map((d) => ({ x: d.bed, y: d.ready, day: d.day }));
+  scatterChart($("c-bedtime"), pts, { color: S1 });
+
+  lineChart($("c-hrv"), days, [{ name: "HRV", key: "hrv", color: S1, fmt: (v) => v + " ms" }], {});
+  lineChart($("c-rhr"), days, [{ name: "最低心率", key: "rhr", color: S1, fmt: (v) => v + " bpm" }], {});
+  barChart($("c-steps"), days, [{ name: "步数", key: "steps", color: S1 }], { yFmt: (v) => v >= 1000 ? v / 1000 + "k" : v });
+
+  legend("lg-stress", [[S2, "高压力"], [S1, "恢复"]]);
+  barChart($("c-stress"), days, [
+    { name: "高压力", key: "stress", color: S2, fmt: (v) => Math.round(v) + " 分钟" },
+    { name: "恢复", key: "recovery", color: S1, fmt: (v) => Math.round(v) + " 分钟" },
+  ], { yFmt: (v) => v + "m" });
+
+  // 数据表
+  const cols = [["日期", (d) => d.day], ["睡眠分", (d) => fmtInt(d.sleepScore)], ["准备度", (d) => fmtInt(d.ready)], ["活动分", (d) => fmtInt(d.act)],
+    ["入睡", (d) => fmtClock(d.bed)], ["睡眠时长", (d) => fmtHM(d.total)], ["深睡", (d) => fmtHM(d.deep)], ["REM", (d) => fmtHM(d.rem)],
+    ["HRV", (d) => fmtInt(d.hrv)], ["最低心率", (d) => fmtInt(d.rhr)], ["体温偏差", (d) => d.temp == null ? "–" : d.temp.toFixed(2)],
+    ["步数", (d) => fmtInt(d.steps)], ["高压力(分)", (d) => fmtInt(d.stress)], ["恢复(分)", (d) => fmtInt(d.recovery)]];
+  $("table").innerHTML = `<thead><tr>${cols.map((c) => `<th>${c[0]}</th>`).join("")}</tr></thead><tbody>` +
+    days.slice().reverse().map((d) => `<tr>${cols.map((c) => `<td>${c[1](d)}</td>`).join("")}</tr>`).join("") + "</tbody>";
+}
+
+function setPressed(groupId, attr, val) {
+  for (const b of $(groupId).querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset[attr] === String(val)));
+}
+
+async function useSource(src) {
+  let raw;
+  try { raw = await loadSource(src); }
+  catch (e) {
+    if (src === "real") {
+      state.missingReal = true;
+      if (state.src) { render(); return; }
+      return useSource("demo");
+    }
+    $("sub").textContent = "数据加载失败：" + e.message; return;
+  }
+  state.src = src;
+  state.data = { days: buildDays(raw), meta: raw.meta };
+  setPressed("source", "src", src);
+  const badge = $("badge");
+  badge.className = "badge " + src;
+  badge.textContent = src === "demo" ? "演示数据（随机生成）" : "真实数据 · 仅本地";
+  const m = raw.meta;
+  $("sub").textContent = `${m.start} 至 ${m.end}`;
+  $("footer").textContent = `数据生成于 ${m.generated.replace("T", " ")}` + (src === "demo" ? " · 这里显示的是假数据，不是任何人的真实健康数据" : "");
+  render();
+}
+
+$("range").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  state.days = +b.dataset.days; setPressed("range", "days", state.days); if (state.data) render();
+});
+$("source").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (b) useSource(b.dataset.src);
+});
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => state.data && render(), 120); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => state.data && render());
+
+// 线上（GitHub Pages）只显示演示数据，并隐藏"真实"按钮；本地优先读真实数据
+if (!isLocal) $("source").style.display = "none";
+const want = new URLSearchParams(location.search).get("data");
+useSource(want === "demo" || !isLocal ? "demo" : "real");
+</script>
+</body>
+</html>

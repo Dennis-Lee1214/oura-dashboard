@@ -1,0 +1,6 @@
+# 真实健康数据和令牌，永远不提交
+docs/data/real/
+.env
+
+__pycache__/
+.DS_Store
