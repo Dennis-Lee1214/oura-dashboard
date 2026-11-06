@@ -10,7 +10,10 @@
   --page: #f9f9f7; --surface: #fcfcfb; --border: rgba(11,11,11,0.10);
   --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
   --grid: #e1e0d9; --axis: #c3c2b7;
-  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --pos: #2a78d6; --neg: #e34948;
+  --q1: #cde2fb; --q2: #86b6ef; --q3: #5598e7; --q4: #2a78d6; --q5: #184f95;
+  --warn: #fab219; --warn-bg: #fff6e0;
   --demo-bg: #fdf3e7; --demo-ink: #8a4b00;
   --real-bg: #e8f4ec; --real-ink: #006300;
 }
@@ -20,7 +23,10 @@
     --page: #0d0d0d; --surface: #1a1a19; --border: rgba(255,255,255,0.10);
     --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
     --grid: #2c2c2a; --axis: #383835;
-    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --pos: #3987e5; --neg: #e66767;
+    --q1: #104281; --q2: #1c5cab; --q3: #2a78d6; --q4: #5598e7; --q5: #9ec5f4;
+    --warn: #fab219; --warn-bg: #2e2612;
     --demo-bg: #3a2a14; --demo-ink: #f4b766;
     --real-bg: #16301d; --real-ink: #5fd35f;
   }
@@ -30,7 +36,10 @@
   --page: #0d0d0d; --surface: #1a1a19; --border: rgba(255,255,255,0.10);
   --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
   --grid: #2c2c2a; --axis: #383835;
-  --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --pos: #3987e5; --neg: #e66767;
+  --q1: #104281; --q2: #1c5cab; --q3: #2a78d6; --q4: #5598e7; --q5: #9ec5f4;
+  --warn: #fab219; --warn-bg: #2e2612;
   --demo-bg: #3a2a14; --demo-ink: #f4b766;
   --real-bg: #16301d; --real-ink: #5fd35f;
 }
@@ -42,17 +51,24 @@ body {
 main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
 header { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 h1 { font-size: 22px; margin: 0; letter-spacing: 0.01em; }
+h3 { font-size: 13px; color: var(--ink-2); margin: 18px 0 8px; font-weight: 600; }
 .sub { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
 .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
 .seg button { border: 0; background: none; color: var(--ink-2); padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--border); }
 .seg button[aria-pressed="true"] { color: var(--ink); font-weight: 600; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.seg.sm button { padding: 3px 10px; font-size: 12.5px; }
 .badge { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
 .badge.demo { background: var(--demo-bg); color: var(--demo-ink); }
 .badge.real { background: var(--real-bg); color: var(--real-ink); }
 .note { background: var(--demo-bg); color: var(--demo-ink); border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
-.note.hidden { display: none; }
+.hidden { display: none !important; }
+.alerts { display: grid; gap: 8px; margin-bottom: 16px; }
+.alert { display: flex; gap: 10px; align-items: flex-start; background: var(--warn-bg); border: 1px solid var(--border); border-left: 4px solid var(--warn); border-radius: 10px; padding: 10px 14px; font-size: 13.5px; }
+.alert svg { flex: none; margin-top: 2px; }
+.alert b { display: block; }
+.alert span { color: var(--ink-2); font-size: 12.5px; }
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .tile, .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
 .tile { padding: 14px 16px; }
@@ -62,14 +78,18 @@ h1 { font-size: 22px; margin: 0; letter-spacing: 0.01em; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 16px; }
 .card { padding: 16px 16px 12px; min-width: 0; }
 .card.wide { grid-column: 1 / -1; }
+.card-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: flex-start; }
 .card h2 { font-size: 15px; margin: 0; }
 .card .desc { color: var(--ink-2); font-size: 12.5px; margin: 2px 0 8px; }
-.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); margin-bottom: 4px; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); margin-bottom: 4px; align-items: center; }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.legend i.band { width: 16px; height: 8px; border-radius: 2px; opacity: .35; }
+.legend i.dot { width: 9px; height: 9px; border-radius: 50%; }
 .chart { position: relative; width: 100%; }
 .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 .chart text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-.chart .lbl { fill: var(--ink-2); font-size: 11.5px; }
+.chart .lbl { fill: var(--ink-2); font-size: 11.5px; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+.clickable { cursor: pointer; }
 .tip {
   position: absolute; pointer-events: none; z-index: 5; min-width: 120px;
   background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 8px;
@@ -79,15 +99,36 @@ h1 { font-size: 22px; margin: 0; letter-spacing: 0.01em; }
 .tip b { display: block; margin-bottom: 2px; }
 .tip i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
 .tip span.n { float: right; margin-left: 14px; font-variant-numeric: tabular-nums; }
+.tip .hint { color: var(--muted); font-size: 11.5px; margin-top: 3px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px 16px; margin: 4px 0 10px; }
+.stat .k { color: var(--ink-2); font-size: 12.5px; }
+.stat .v { font-size: 20px; font-weight: 650; }
+.stat .d { color: var(--muted); font-size: 11.5px; }
+.tagtable { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.tagtable th, .tagtable td { padding: 7px 8px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; }
+.tagtable th:first-child, .tagtable td:first-child { text-align: left; }
+.tagtable th { color: var(--ink-2); font-weight: 600; font-size: 12px; }
+.tagtable .sm { color: var(--muted); font-size: 11.5px; }
+.delta { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.delta svg { flex: none; }
+.daynav { display: flex; gap: 6px; align-items: center; }
+.daynav button { border: 1px solid var(--border); background: var(--surface); color: var(--ink); border-radius: 8px; width: 30px; height: 28px; cursor: pointer; font: inherit; }
+.daynav button:disabled { opacity: .35; cursor: default; }
+.daynav span { font-weight: 600; font-size: 14px; min-width: 96px; text-align: center; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.chip { font-size: 12px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--border); color: var(--ink-2); }
 details { margin-top: 16px; }
 summary { cursor: pointer; color: var(--ink-2); font-size: 13px; }
 .tablewrap { overflow-x: auto; margin-top: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
-table { border-collapse: collapse; width: 100%; font-size: 12.5px; font-variant-numeric: tabular-nums; }
-th, td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
-th:first-child, td:first-child { text-align: left; }
-th { color: var(--ink-2); font-weight: 600; }
+table.data { border-collapse: collapse; width: 100%; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+table.data th, table.data td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+table.data th:first-child, table.data td:first-child { text-align: left; }
+table.data th { color: var(--ink-2); font-weight: 600; }
+table.data tbody tr { cursor: pointer; }
+table.data tbody tr:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); }
 footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
 .empty { color: var(--muted); font-size: 13px; padding: 40px 0; text-align: center; }
+.scrollx { overflow-x: auto; }
 </style>
 </head>
 <body>
@@ -112,16 +153,36 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
   </header>
 
   <div class="note hidden" id="note"></div>
-
+  <section class="alerts" id="alerts" aria-live="polite"></section>
   <section class="tiles" id="tiles"></section>
 
   <section class="grid">
     <div class="card wide">
       <h2>三项分数</h2>
-      <p class="desc">睡眠、准备度、活动分数的每日变化</p>
+      <p class="desc">睡眠、准备度、活动分数的每日变化。点击某一天可以查看当晚详情</p>
       <div class="legend" id="lg-scores"></div>
       <div class="chart" id="c-scores"></div>
     </div>
+
+    <div class="card wide">
+      <h2>个人基线</h2>
+      <p class="desc">阴影是你前 30 天的均值 ±1 个标准差。大圆点表示当天超出了你自己的正常范围</p>
+      <div class="legend" id="lg-base"></div>
+      <div class="grid" style="gap:12px">
+        <div><h3>准备度</h3><div class="chart" id="c-ready"></div></div>
+        <div><h3>夜间 HRV（ms）</h3><div class="chart" id="c-hrv"></div></div>
+        <div><h3>最低静息心率（bpm）</h3><div class="chart" id="c-rhr"></div></div>
+      </div>
+    </div>
+
+    <div class="card wide">
+      <h2>作息规律性</h2>
+      <p class="desc">每根竖条是一晚，从入睡到醒来。周五、周六晚单独标色</p>
+      <div class="stats" id="reg-stats"></div>
+      <div class="legend" id="lg-reg"></div>
+      <div class="chart" id="c-reg"></div>
+    </div>
+
     <div class="card">
       <h2>睡眠时长与阶段</h2>
       <p class="desc">每晚深睡、REM、浅睡的小时数</p>
@@ -133,16 +194,29 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
       <p class="desc">每个点是一晚：横轴入睡时间，纵轴第二天准备度</p>
       <div class="chart" id="c-bedtime"></div>
     </div>
+
     <div class="card">
-      <h2>夜间 HRV</h2>
-      <p class="desc">平均心率变异性（ms），越高通常恢复越好</p>
-      <div class="chart" id="c-hrv"></div>
+      <div class="card-head">
+        <div>
+          <h2>星期对比</h2>
+          <p class="desc" id="wk-desc"></p>
+        </div>
+        <div class="seg sm" id="wk-metric" role="group" aria-label="指标">
+          <button data-m="total" aria-pressed="true">时长</button>
+          <button data-m="bed">入睡</button>
+          <button data-m="ready">准备度</button>
+        </div>
+      </div>
+      <div class="legend" id="lg-wk"></div>
+      <div class="chart" id="c-week"></div>
     </div>
+
     <div class="card">
-      <h2>最低静息心率</h2>
-      <p class="desc">夜间最低心率（bpm）</p>
-      <div class="chart" id="c-rhr"></div>
+      <h2>标签分析</h2>
+      <p class="desc">打了某个标签的那晚，和没打的那些晚上相比差多少。基于全部数据，至少出现 3 次才显示</p>
+      <div class="scrollx" id="tags"></div>
     </div>
+
     <div class="card">
       <h2>步数</h2>
       <p class="desc">每日步数</p>
@@ -154,11 +228,36 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
       <div class="legend" id="lg-stress"></div>
       <div class="chart" id="c-stress"></div>
     </div>
+
+    <div class="card wide">
+      <h2>睡眠日历</h2>
+      <p class="desc">全部数据，每格一天，颜色越深睡眠分数越高。点击格子查看当晚详情</p>
+      <div class="legend" id="lg-cal"></div>
+      <div class="chart scrollx" id="c-cal"></div>
+    </div>
+
+    <div class="card wide" id="detail-card">
+      <div class="card-head">
+        <div>
+          <h2>单日详情</h2>
+          <p class="desc">当晚的睡眠阶段和心率。日期是醒来的那天</p>
+        </div>
+        <div class="daynav">
+          <button id="d-prev" aria-label="前一天">‹</button>
+          <span id="d-date"></span>
+          <button id="d-next" aria-label="后一天">›</button>
+        </div>
+      </div>
+      <div class="chips" id="d-tags"></div>
+      <div class="stats" id="d-stats"></div>
+      <div class="legend" id="lg-detail"></div>
+      <div class="chart" id="c-detail"></div>
+    </div>
   </section>
 
   <details>
     <summary>查看数据表</summary>
-    <div class="tablewrap"><table id="table"></table></div>
+    <div class="tablewrap"><table class="data" id="table"></table></div>
   </details>
 
   <footer id="footer"></footer>
@@ -167,30 +266,50 @@ footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
 <script>
 "use strict";
 const TYPES = ["daily_sleep", "sleep", "daily_readiness", "daily_activity", "daily_stress", "meta"];
+const OPTIONAL = ["enhanced_tag"];
 const isLocal = ["localhost", "127.0.0.1", "[::1]", ""].includes(location.hostname);
-const state = { days: 30, src: null, data: null };
+const state = { days: 30, src: null, data: null, sel: null, wk: "total" };
 const $ = (id) => document.getElementById(id);
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const WEEK = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
 /* ---------- 数据加载 ---------- */
 async function loadSource(src) {
   const out = {};
-  for (const t of TYPES) {
+  for (const t of [...TYPES, ...OPTIONAL]) {
     const r = await fetch(`data/${src}/${t}.json`, { cache: "no-store" });
-    if (!r.ok) throw new Error(`${src}/${t}.json 不存在`);
+    if (!r.ok) {
+      if (OPTIONAL.includes(t)) { out[t] = []; continue; }
+      throw new Error(`${src}/${t}.json 不存在`);
+    }
     out[t] = await r.json();
   }
   return out;
 }
 
+// 读 ISO 字符串里的本地时间（不做时区换算）→ 分钟
+const clockMin = (s) => { const [h, m] = s.slice(11, 16).split(":").map(Number); return h * 60 + m; };
+const addDays = (d, n) => { const t = new Date(d + "T12:00:00Z"); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().slice(0, 10); };
+const dow = (d) => new Date(d + "T12:00:00Z").getUTCDay();
+
+const TAG_NAMES = {
+  caffeine: "咖啡因", late_meal: "晚餐较晚", workout: "运动", alcohol: "饮酒", sauna: "桑拿",
+  meditation: "冥想", sick: "生病", sickness: "生病", travel: "旅行", stress: "压力", nap: "小睡",
+  late_work: "加班", screen_time: "睡前看屏幕", period: "生理期", party: "聚会", hot_shower: "热水澡",
+};
+function tagName(t) {
+  if (t.custom_name) return t.custom_name;
+  const code = (t.tag_type_code || "未知").replace(/^tag_(generic|sleep|activity)_/, "");
+  return TAG_NAMES[code] || code.replace(/_/g, " ");
+}
+
 function buildDays(raw) {
   const byDay = new Map();
-  const get = (d) => { if (!byDay.has(d)) byDay.set(d, { day: d }); return byDay.get(d); };
+  const get = (d) => { if (!byDay.has(d)) byDay.set(d, { day: d, tags: [] }); return byDay.get(d); };
   for (const r of raw.daily_sleep) get(r.day).sleepScore = r.score;
   for (const r of raw.daily_readiness) { const o = get(r.day); o.ready = r.score; o.temp = r.temperature_deviation; }
   for (const r of raw.daily_activity) { const o = get(r.day); o.act = r.score; o.steps = r.steps; }
   for (const r of raw.daily_stress) { const o = get(r.day); o.stress = r.stress_high / 60; o.recovery = r.recovery_high / 60; }
-  // 每天只取最长的一段睡眠（排除小睡）
   const best = new Map();
   for (const s of raw.sleep) {
     if (s.type && !["long_sleep", "sleep"].includes(s.type)) continue;
@@ -199,26 +318,56 @@ function buildDays(raw) {
   }
   for (const [d, s] of best) {
     const o = get(d);
+    o.doc = s;
     o.total = s.total_sleep_duration / 3600;
     o.deep = s.deep_sleep_duration / 3600;
     o.rem = s.rem_sleep_duration / 3600;
     o.light = s.light_sleep_duration / 3600;
-    o.hrv = s.average_hrv; o.rhr = s.lowest_heart_rate;
-    if (s.bedtime_start) {
-      // 直接读字符串里的本地时间，避免浏览器时区换算
-      const [h, m] = s.bedtime_start.slice(11, 16).split(":").map(Number);
-      o.bed = (h < 12 ? h + 24 : h) * 60 + m; // 18:00 之后的分钟数轴：0 点记作 24:00
+    o.awake = (s.awake_time || 0) / 3600;
+    o.eff = s.efficiency;
+    o.hrv = s.average_hrv; o.rhr = s.lowest_heart_rate; o.avgHr = s.average_heart_rate;
+    // 时间轴：18:00 之后的分钟数，跨午夜继续累加
+    if (s.bedtime_start) { const m = clockMin(s.bedtime_start); o.bed = m < 12 * 60 ? m + 1440 : m; }
+    if (s.bedtime_end) { const m = clockMin(s.bedtime_end); o.wake = m < 18 * 60 ? m + 1440 : m; }
+    if (o.bed != null && o.wake != null) o.mid = (o.bed + o.wake) / 2;
+  }
+  // 标签打在入睡那天，影响的是第二天醒来的那晚
+  for (const t of raw.enhanced_tag || []) {
+    const startDay = t.start_day || (t.start_time || "").slice(0, 10);
+    if (!startDay) continue;
+    const effect = addDays(startDay, 1);
+    if (byDay.has(effect)) {
+      const name = tagName(t);
+      const o = byDay.get(effect);
+      if (!o.tags.includes(name)) o.tags.push(name);
     }
   }
-  return [...byDay.values()].sort((a, b) => a.day.localeCompare(b.day));
+  const days = [...byDay.values()].sort((a, b) => a.day.localeCompare(b.day));
+  for (const d of days) { d.wakeDow = dow(d.day); d.nightDow = (d.wakeDow + 6) % 7; d.free = d.nightDow === 5 || d.nightDow === 6; }
+  for (const k of ["ready", "hrv", "rhr"]) addBaseline(days, k);
+  return days;
 }
 
-/* ---------- 格式化 ---------- */
+// 每天的基线：前 30 天（不含当天）的均值和标准差，至少 7 个数值
+function addBaseline(days, key) {
+  days.forEach((d, i) => {
+    const vals = days.slice(Math.max(0, i - 30), i).map((x) => x[key]).filter((v) => v != null);
+    if (vals.length < 7) return;
+    const m = mean(vals), s = sd(vals);
+    d[key + "_m"] = m; d[key + "_s"] = s;
+  });
+}
+
+/* ---------- 格式化 / 统计 ---------- */
 const fmtDay = (d) => `${+d.slice(5, 7)}/${+d.slice(8, 10)}`;
-const fmtHM = (h) => { if (h == null) return "–"; const m = Math.round(h * 60); return `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}`; };
-const fmtClock = (mins) => { if (mins == null) return "–"; const t = Math.round(mins) % 1440; return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`; };
-const fmtInt = (v) => v == null ? "–" : Math.round(v).toLocaleString("zh-CN");
-const avg = (arr) => { const v = arr.filter((x) => x != null && !isNaN(x)); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+const fmtHM = (h) => { if (h == null || isNaN(h)) return "–"; const m = Math.round(h * 60); return `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}`; };
+const fmtClock = (mins) => { if (mins == null) return "–"; const t = ((Math.round(mins) % 1440) + 1440) % 1440; return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`; };
+const fmtInt = (v) => v == null || isNaN(v) ? "–" : Math.round(v).toLocaleString("zh-CN");
+const signed = (v, digits = 0, unit = "") => v == null || isNaN(v) ? "–" : `${v > 0 ? "+" : v < 0 ? "−" : "±"}${Math.abs(v).toFixed(digits)}${unit}`;
+const clean = (arr) => arr.filter((x) => x != null && !isNaN(x));
+const mean = (arr) => { const v = clean(arr); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+const sd = (arr) => { const v = clean(arr); if (v.length < 2) return null; const m = mean(v); return Math.sqrt(v.reduce((a, b) => a + (b - m) ** 2, 0) / (v.length - 1)); };
+const avg = mean;
 
 /* ---------- 图表基础 ---------- */
 const NS = "http://www.w3.org/2000/svg";
@@ -229,30 +378,31 @@ function el(tag, attrs = {}, parent) {
   return e;
 }
 function niceTicks(min, max, n = 4) {
-  const span = max - min || 1;
-  const step0 = span / n, mag = 10 ** Math.floor(Math.log10(step0));
+  if (min === max) { min -= 1; max += 1; }
+  const step0 = (max - min) / n, mag = 10 ** Math.floor(Math.log10(step0));
   const step = [1, 2, 2.5, 5, 10].map((s) => s * mag).find((s) => s >= step0);
   const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step;
   const t = []; for (let v = lo; v <= hi + step / 2; v += step) t.push(+v.toFixed(6));
   return t;
 }
-function frame(host, { h = 220, yMin, yMax, yFmt = (v) => v, ticks }) {
+function frame(host, { h = 220, yMin, yMax, yFmt = (v) => v, ticks, invert = false, ml = 40 }) {
   host.innerHTML = "";
-  const W = Math.max(host.clientWidth, 280), H = h, m = { l: 40, r: 12, t: 10, b: 24 };
+  const W = Math.max(host.clientWidth, 280), H = h, m = { l: ml, r: 12, t: 10, b: 24 };
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" }, host);
   const tip = document.createElement("div"); tip.className = "tip"; host.appendChild(tip);
   const yt = ticks || niceTicks(yMin, yMax);
   const y0 = yt[0], y1 = yt[yt.length - 1];
   const iw = W - m.l - m.r, ih = H - m.t - m.b;
-  const y = (v) => m.t + ih - ((v - y0) / (y1 - y0)) * ih;
+  const y = invert ? (v) => m.t + ((v - y0) / (y1 - y0)) * ih : (v) => m.t + ih - ((v - y0) / (y1 - y0)) * ih;
   for (const v of yt) {
-    el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: v === y0 ? css("--axis") : css("--grid"), "stroke-width": 1 }, svg);
+    const base = invert ? v === y1 : v === y0;
+    el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: base ? css("--axis") : css("--grid"), "stroke-width": 1 }, svg);
     const t = el("text", { x: m.l - 6, y: y(v) + 3.5, "text-anchor": "end" }, svg); t.textContent = yFmt(v);
   }
-  return { svg, tip, W, H, m, iw, ih, y, host };
+  return { svg, tip, W, H, m, iw, ih, y, host, y0, y1 };
 }
 function xLabels(f, days, xAt) {
-  const n = days.length, every = Math.max(1, Math.ceil(n / Math.floor(f.iw / 52)));
+  const n = days.length, every = Math.max(1, Math.ceil(n / Math.max(1, Math.floor(f.iw / 52))));
   days.forEach((d, i) => {
     if ((n - 1 - i) % every) return;
     const t = el("text", { x: xAt(i), y: f.H - 6, "text-anchor": "middle" }, f.svg); t.textContent = fmtDay(d.day);
@@ -266,17 +416,41 @@ function showTip(f, html, px, py) {
 }
 const hideTip = (f) => { f.tip.style.opacity = 0; };
 const row = (color, name, val) => `<div>${color ? `<i style="background:${color}"></i>` : ""}${name}<span class="n">${val}</span></div>`;
-function legend(id, items) { $(id).innerHTML = items.map(([c, n]) => `<span><i style="background:${c}"></i>${n}</span>`).join(""); }
-function emptyChart(host) { host.innerHTML = `<div class="empty">这个时间段还没有数据</div>`; }
+function legend(id, items) {
+  $(id).innerHTML = items.map(([c, n, cls]) => `<span><i class="${cls || ""}" style="background:${c}"></i>${n}</span>`).join("");
+}
+function emptyChart(host, msg = "这个时间段还没有数据") { host.innerHTML = `<div class="empty">${msg}</div>`; }
+function selectDay(day, scroll = true) {
+  state.sel = day; renderDetail();
+  if (scroll) $("detail-card").scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
-/* 折线图：series = [{name, color, key, fmt}] */
-function lineChart(host, days, series, opts) {
+/* 折线图：series = [{name, color, key, fmt}]；opts.band 画基线带；opts.click 可点击选日 */
+function lineChart(host, days, series, opts = {}) {
   const vals = days.flatMap((d) => series.map((s) => d[s.key])).filter((v) => v != null);
   if (!vals.length) return emptyChart(host);
-  const f = frame(host, { yMin: opts.yMin ?? Math.min(...vals), yMax: opts.yMax ?? Math.max(...vals), ...opts });
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (opts.band) for (const d of days) {
+    const m = d[opts.band + "_m"], s = d[opts.band + "_s"];
+    if (m != null) { lo = Math.min(lo, m - s); hi = Math.max(hi, m + s); }
+  }
+  const f = frame(host, { yMin: opts.yMin ?? lo, yMax: opts.yMax ?? hi, ...opts });
   const step = days.length > 1 ? f.iw / (days.length - 1) : 0;
   const x = (i) => f.m.l + (days.length > 1 ? i * step : f.iw / 2);
   xLabels(f, days, x);
+  const isOut = (d, k) => opts.band && d[k] != null && d[k + "_m"] != null && Math.abs(d[k] - d[k + "_m"]) > d[k + "_s"];
+
+  if (opts.band) {
+    const k = opts.band, color = series[0].color;
+    let up = [], dn = [], segs = [];
+    const flush = () => { if (up.length > 1) segs.push(up.concat(dn.reverse())); up = []; dn = []; };
+    days.forEach((d, i) => {
+      if (d[k + "_m"] == null) { flush(); return; }
+      up.push([x(i), f.y(d[k + "_m"] + d[k + "_s"])]); dn.push([x(i), f.y(d[k + "_m"] - d[k + "_s"])]);
+    });
+    flush();
+    for (const p of segs) el("path", { d: "M" + p.map((q) => q.map((v) => v.toFixed(1)).join(",")).join("L") + "Z", fill: color, opacity: 0.14 }, f.svg);
+  }
   for (const s of series) {
     let dStr = "", pen = false;
     days.forEach((d, i) => {
@@ -285,36 +459,59 @@ function lineChart(host, days, series, opts) {
       dStr += `${pen ? "L" : "M"}${x(i).toFixed(1)},${f.y(v).toFixed(1)}`; pen = true;
     });
     el("path", { d: dStr, fill: "none", stroke: s.color, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, f.svg);
-    if (days.length <= 31) days.forEach((d, i) => { if (d[s.key] != null) el("circle", { cx: x(i), cy: f.y(d[s.key]), r: 2.5, fill: s.color }, f.svg); });
+    days.forEach((d, i) => {
+      if (d[s.key] == null) return;
+      if (isOut(d, s.key)) el("circle", { cx: x(i), cy: f.y(d[s.key]), r: 5, fill: s.color, stroke: css("--surface"), "stroke-width": 2 }, f.svg);
+      else if (days.length <= 31) el("circle", { cx: x(i), cy: f.y(d[s.key]), r: 2.5, fill: s.color }, f.svg);
+    });
   }
-  // 交互：十字线 + 提示
   const cross = el("line", { y1: f.m.t, y2: f.m.t + f.ih, stroke: css("--axis"), "stroke-width": 1, opacity: 0 }, f.svg);
   const dots = series.map((s) => el("circle", { r: 4.5, fill: s.color, stroke: css("--surface"), "stroke-width": 2, opacity: 0 }, f.svg));
-  const hit = el("rect", { x: f.m.l - 6, y: 0, width: f.iw + 12, height: f.H, fill: "transparent" }, f.svg);
-  const move = (ev) => {
+  const hit = el("rect", { x: f.m.l - 6, y: 0, width: f.iw + 12, height: f.H, fill: "transparent", class: "clickable" }, f.svg);
+  const idxAt = (ev) => {
     const r = f.svg.getBoundingClientRect(), px = (ev.clientX - r.left) * (f.W / r.width);
-    const i = Math.max(0, Math.min(days.length - 1, Math.round((px - f.m.l) / (step || 1))));
-    const d = days[i];
+    return Math.max(0, Math.min(days.length - 1, Math.round((px - f.m.l) / (step || 1))));
+  };
+  const move = (ev) => {
+    const i = idxAt(ev), d = days[i];
     cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("opacity", 1);
     series.forEach((s, k) => {
       const v = d[s.key];
       dots[k].setAttribute("opacity", v == null ? 0 : 1);
       if (v != null) { dots[k].setAttribute("cx", x(i)); dots[k].setAttribute("cy", f.y(v)); }
     });
-    showTip(f, `<b>${d.day}</b>` + series.map((s) => row(series.length > 1 ? s.color : null, s.name, d[s.key] == null ? "–" : (s.fmt || fmtInt)(d[s.key]))).join(""), x(i), f.m.t + 10);
+    let html = `<b>${d.day}</b>` + series.map((s) => row(series.length > 1 ? s.color : null, s.name, d[s.key] == null ? "–" : (s.fmt || fmtInt)(d[s.key]))).join("");
+    if (opts.band && d[opts.band + "_m"] != null) {
+      const k = opts.band, fm = series[0].fmt || fmtInt;
+      html += row(null, "基线范围", `${fm(d[k + "_m"] - d[k + "_s"])}–${fm(d[k + "_m"] + d[k + "_s"])}`);
+      if (isOut(d, k)) html += `<div class="hint">${d[k] > d[k + "_m"] ? "高于" : "低于"}你的正常范围</div>`;
+    }
+    html += `<div class="hint">点击查看当晚详情</div>`;
+    showTip(f, html, x(i), f.m.t + 10);
   };
   hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move);
+  hit.addEventListener("click", (ev) => selectDay(days[idxAt(ev)].day));
   hit.addEventListener("pointerleave", () => { cross.setAttribute("opacity", 0); dots.forEach((c) => c.setAttribute("opacity", 0)); hideTip(f); });
 }
 
+function bar(svg, x, y, w, h, r, fill, down = false) {
+  if (h <= 0) return;
+  r = Math.min(r, h, w / 2);
+  const d = down
+    ? `M${x},${y}V${y + h - r}Q${x},${y + h} ${x + r},${y + h}H${x + w - r}Q${x + w},${y + h} ${x + w},${y + h - r}V${y}Z`
+    : `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+  return el("path", { d, fill }, svg);
+}
+
 /* 柱状图：stack=true 时堆叠，否则并列 */
-function barChart(host, days, series, opts) {
+function barChart(host, days, series, opts = {}) {
   const tot = days.map((d) => opts.stack ? series.reduce((a, s) => a + (d[s.key] || 0), 0) : Math.max(0, ...series.map((s) => d[s.key] || 0)));
   if (!days.some((d) => series.some((s) => d[s.key] != null))) return emptyChart(host);
   const f = frame(host, { yMin: 0, yMax: Math.max(...tot) * 1.05, ...opts });
   const slot = f.iw / days.length, gap = 2;
   const groupW = Math.min(28, Math.max(2, slot * 0.72));
   const x = (i) => f.m.l + slot * (i + 0.5);
+  const hl = el("rect", { y: f.m.t, height: f.ih, fill: css("--ink"), opacity: 0 }, f.svg);
   xLabels(f, days, x);
   const r = Math.min(4, groupW / 4);
   days.forEach((d, i) => {
@@ -323,25 +520,20 @@ function barChart(host, days, series, opts) {
       const live = series.filter((s) => d[s.key]);
       live.forEach((s, k) => {
         const v = d[s.key], yTop = f.y(base + v), yBot = f.y(base);
-        const top = k === live.length - 1;
         const hgt = Math.max(0, yBot - yTop - (k > 0 ? gap : 0));
-        bar(f.svg, x(i) - groupW / 2, yTop, groupW, hgt, top ? r : 0, s.color);
+        bar(f.svg, x(i) - groupW / 2, yTop, groupW, hgt, k === live.length - 1 ? r : 0, s.color);
         base += v;
       });
     } else {
       const bw = Math.max(1.5, (groupW - gap * (series.length - 1)) / series.length);
       series.forEach((s, k) => {
         const v = d[s.key]; if (v == null) return;
-        const bx = x(i) - groupW / 2 + k * (bw + gap);
-        bar(f.svg, bx, f.y(v), bw, f.y(0) - f.y(v), Math.min(r, bw / 2), s.color);
+        bar(f.svg, x(i) - groupW / 2 + k * (bw + gap), f.y(v), bw, f.y(0) - f.y(v), Math.min(r, bw / 2), s.color);
       });
     }
   });
-  // 交互：整列命中区
-  const hl = el("rect", { y: f.m.t, height: f.ih, fill: css("--ink"), opacity: 0 }, f.svg);
-  f.svg.insertBefore(hl, f.svg.firstChild.nextSibling);
   days.forEach((d, i) => {
-    const h = el("rect", { x: f.m.l + slot * i, y: 0, width: slot, height: f.H, fill: "transparent" }, f.svg);
+    const h = el("rect", { x: f.m.l + slot * i, y: 0, width: slot, height: f.H, fill: "transparent", class: "clickable" }, f.svg);
     const on = () => {
       hl.setAttribute("x", f.m.l + slot * i); hl.setAttribute("width", slot); hl.setAttribute("opacity", 0.05);
       let html = `<b>${d.day}</b>` + series.map((s) => row(series.length > 1 ? s.color : null, s.name, d[s.key] == null ? "–" : (s.fmt || fmtInt)(d[s.key]))).join("");
@@ -349,66 +541,348 @@ function barChart(host, days, series, opts) {
       showTip(f, html, x(i), f.m.t + 10);
     };
     h.addEventListener("pointerenter", on); h.addEventListener("pointerdown", on);
+    h.addEventListener("click", () => selectDay(d.day));
     h.addEventListener("pointerleave", () => { hl.setAttribute("opacity", 0); hideTip(f); });
   });
 }
-function bar(svg, x, y, w, h, r, fill) {
-  if (h <= 0) return;
-  r = Math.min(r, h, w / 2);
-  // 只有顶端圆角，底部贴住基线
-  const d = `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
-  el("path", { d, fill }, svg);
-}
 
-/* 散点图 */
+/* 散点图：入睡时间 vs 准备度 */
 function scatterChart(host, pts, opts) {
   if (!pts.length) return emptyChart(host);
   const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
   const f = frame(host, { yMin: Math.min(...ys) - 3, yMax: Math.max(...ys) + 3, ...opts });
-  const xt = [];
   const x0 = Math.floor((Math.min(...xs) - 15) / 60) * 60, x1 = Math.ceil((Math.max(...xs) + 15) / 60) * 60;
-  for (let v = x0; v <= x1; v += 60) xt.push(v);
   const x = (v) => f.m.l + ((v - x0) / (x1 - x0 || 1)) * f.iw;
-  const every = Math.ceil(xt.length / Math.floor(f.iw / 50));
+  const xt = []; for (let v = x0; v <= x1; v += 60) xt.push(v);
+  const every = Math.ceil(xt.length / Math.max(1, Math.floor(f.iw / 50)));
   xt.forEach((v, i) => {
     if (i % every) return;
     el("line", { x1: x(v), x2: x(v), y1: f.m.t, y2: f.m.t + f.ih, stroke: css("--grid") }, f.svg);
     const t = el("text", { x: x(v), y: f.H - 6, "text-anchor": "middle" }, f.svg); t.textContent = fmtClock(v);
   });
-  // 趋势线（最小二乘）
   if (pts.length >= 5) {
-    const mx = avg(xs), my = avg(ys);
+    const mx = mean(xs), my = mean(ys);
     const b = pts.reduce((a, p) => a + (p.x - mx) * (p.y - my), 0) / (pts.reduce((a, p) => a + (p.x - mx) ** 2, 0) || 1);
     const a = my - b * mx;
     el("line", { x1: x(x0), y1: f.y(a + b * x0), x2: x(x1), y2: f.y(a + b * x1), stroke: css("--ink-2"), "stroke-width": 1.5, "stroke-dasharray": "4 4", opacity: 0.7 }, f.svg);
-    const perHour = b * 60;
     const t = el("text", { x: f.W - f.m.r, y: f.m.t + 12, "text-anchor": "end", class: "lbl" }, f.svg);
-    t.textContent = `入睡每晚 1 小时，准备度约 ${perHour >= 0 ? "+" : "−"}${Math.abs(perHour).toFixed(1)}`;
+    t.textContent = `入睡每晚 1 小时，准备度约 ${signed(b * 60, 1)}`;
   }
   for (const p of pts) {
     const c = el("circle", { cx: x(p.x), cy: f.y(p.y), r: 4.5, fill: opts.color, stroke: css("--surface"), "stroke-width": 1.5, "fill-opacity": 0.85 }, f.svg);
-    const hit = el("circle", { cx: x(p.x), cy: f.y(p.y), r: 11, fill: "transparent" }, f.svg);
+    const hit = el("circle", { cx: x(p.x), cy: f.y(p.y), r: 11, fill: "transparent", class: "clickable" }, f.svg);
     const on = () => { c.setAttribute("r", 6.5); showTip(f, `<b>${p.day}</b>` + row(null, "入睡", fmtClock(p.x)) + row(null, "准备度", p.y), x(p.x), f.y(p.y)); };
     hit.addEventListener("pointerenter", on); hit.addEventListener("pointerdown", on);
+    hit.addEventListener("click", () => selectDay(p.day));
     hit.addEventListener("pointerleave", () => { c.setAttribute("r", 4.5); hideTip(f); });
   }
 }
 
-/* ---------- 渲染 ---------- */
+/* ---------- 作息规律性 ---------- */
+function renderRegularity(days) {
+  const nights = days.filter((d) => d.bed != null && d.wake != null);
+  const work = nights.filter((d) => !d.free), free = nights.filter((d) => d.free);
+  const jet = work.length && free.length ? mean(free.map((d) => d.mid)) - mean(work.map((d) => d.mid)) : null;
+  const sBed = sd(nights.map((d) => d.bed)), sWake = sd(nights.map((d) => d.wake));
+  const verdict = (s) => s == null ? "" : s <= 30 ? "很规律" : s <= 60 ? "一般" : "波动较大";
+  $("reg-stats").innerHTML = [
+    ["入睡时间波动", sBed == null ? "–" : `±${Math.round(sBed)} 分钟`, verdict(sBed)],
+    ["起床时间波动", sWake == null ? "–" : `±${Math.round(sWake)} 分钟`, verdict(sWake)],
+    ["社交时差", jet == null ? "–" : fmtHM(Math.abs(jet) / 60), jet == null ? "需要工作日和周末的数据" : `周末睡眠中点比工作日${jet >= 0 ? "晚" : "早"}，1 小时内比较理想`],
+    ["平均起床", fmtClock(mean(nights.map((d) => d.wake))), `工作日 ${fmtClock(mean(work.map((d) => d.wake)))} · 周末 ${fmtClock(mean(free.map((d) => d.wake)))}`],
+  ].map(([k, v, d]) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
+
+  const S1 = css("--s1"), S2 = css("--s2");
+  legend("lg-reg", [[S1, "周日–周四晚"], [S2, "周五、周六晚"]]);
+  $("lg-reg").insertAdjacentHTML("beforeend", `<span><svg width="18" height="8" aria-hidden="true" style="margin-right:5px"><line x1="0" x2="18" y1="4" y2="4" stroke="${css("--ink-2")}" stroke-dasharray="4 3"/></svg>平均入睡 ${fmtClock(mean(nights.map((d) => d.bed)))} / 平均起床 ${fmtClock(mean(nights.map((d) => d.wake)))}</span>`);
+  const host = $("c-reg");
+  if (!nights.length) return emptyChart(host);
+  const lo = Math.floor((Math.min(...nights.map((d) => d.bed)) - 20) / 120) * 120;
+  const hi = Math.ceil((Math.max(...nights.map((d) => d.wake)) + 20) / 120) * 120;
+  const ticks = []; for (let v = lo; v <= hi; v += 120) ticks.push(v);
+  const f = frame(host, { h: 240, ticks, yFmt: fmtClock, invert: true, ml: 44 });
+  const slot = f.iw / days.length, bw = Math.min(16, Math.max(2, slot * 0.6));
+  const x = (i) => f.m.l + slot * (i + 0.5);
+  xLabels(f, days, x);
+  // 平均入睡 / 起床参考线
+  for (const v of [mean(nights.map((d) => d.bed)), mean(nights.map((d) => d.wake))]) {
+    el("line", { x1: f.m.l, x2: f.W - f.m.r, y1: f.y(v), y2: f.y(v), stroke: css("--ink-2"), "stroke-dasharray": "4 4", opacity: 0.6 }, f.svg);
+  }
+  days.forEach((d, i) => {
+    if (d.bed == null || d.wake == null) return;
+    const y1 = f.y(d.bed), y2 = f.y(d.wake), r = Math.min(4, bw / 2);
+    const p = `M${x(i) - bw / 2},${y1 + r}Q${x(i) - bw / 2},${y1} ${x(i) - bw / 2 + r},${y1}H${x(i) + bw / 2 - r}Q${x(i) + bw / 2},${y1} ${x(i) + bw / 2},${y1 + r}V${y2 - r}Q${x(i) + bw / 2},${y2} ${x(i) + bw / 2 - r},${y2}H${x(i) - bw / 2 + r}Q${x(i) - bw / 2},${y2} ${x(i) - bw / 2},${y2 - r}Z`;
+    el("path", { d: p, fill: d.free ? S2 : S1 }, f.svg);
+    const h = el("rect", { x: f.m.l + slot * i, y: 0, width: slot, height: f.H, fill: "transparent", class: "clickable" }, f.svg);
+    const on = () => showTip(f, `<b>${d.day}（${WEEK[d.nightDow]}晚）</b>` + row(null, "入睡", fmtClock(d.bed)) + row(null, "醒来", fmtClock(d.wake)) + row(null, "睡眠", fmtHM(d.total)), x(i), y1);
+    h.addEventListener("pointerenter", on); h.addEventListener("pointerdown", on);
+    h.addEventListener("click", () => selectDay(d.day));
+    h.addEventListener("pointerleave", () => hideTip(f));
+  });
+}
+
+/* ---------- 星期对比 ---------- */
+function renderWeekday(days) {
+  const metric = state.wk;
+  const order = [1, 2, 3, 4, 5, 6, 0];
+  const S1 = css("--s1"), S2 = css("--s2");
+  const overall = mean(days.map((d) => d[metric]));
+  const groups = order.map((n) => {
+    const g = days.filter((d) => d.nightDow === n && d[metric] != null);
+    return { n, label: WEEK[n] + "晚", count: g.length, v: mean(g.map((d) => d[metric])), free: n === 5 || n === 6 };
+  });
+  const cfg = {
+    total: { desc: "每晚平均睡眠时长", fmt: fmtHM, yFmt: (v) => v + "h", diverge: false },
+    bed: { desc: "每晚入睡时间，相对你的平均入睡时间早或晚多少分钟", fmt: (v) => signed(v, 0, " 分钟"), yFmt: (v) => (v > 0 ? "+" : "") + v, diverge: true },
+    ready: { desc: "那晚之后第二天早上的平均准备度", fmt: fmtInt, yFmt: (v) => v, diverge: false },
+  }[metric];
+  if (metric === "bed") groups.forEach((g) => { if (g.v != null) g.v -= overall; });
+  $("wk-desc").textContent = cfg.desc + "（按入睡那晚分组）";
+  legend("lg-wk", [[S1, "周日–周四晚"], [S2, "周五、周六晚"]]);
+  const host = $("c-week");
+  const vals = clean(groups.map((g) => g.v));
+  if (!vals.length) return emptyChart(host);
+  let yMin, yMax;
+  if (cfg.diverge) { const m = Math.max(10, ...vals.map(Math.abs)); yMin = -m; yMax = m; }
+  else if (metric === "ready") { yMin = Math.max(0, Math.floor((Math.min(...vals) - 10) / 10) * 10); yMax = Math.min(100, Math.ceil((Math.max(...vals) + 5) / 10) * 10); }
+  else { yMin = 0; yMax = Math.max(...vals) * 1.1; }
+  const f = frame(host, { yMin, yMax, yFmt: cfg.yFmt });
+  const slot = f.iw / 7, bw = Math.min(36, slot * 0.6);
+  const x = (i) => f.m.l + slot * (i + 0.5);
+  const zero = f.y(cfg.diverge ? 0 : f.y0);
+  groups.forEach((g, i) => {
+    const t = el("text", { x: x(i), y: f.H - 6, "text-anchor": "middle" }, f.svg); t.textContent = g.label;
+    if (g.v == null) return;
+    const yv = f.y(g.v), up = yv <= zero;
+    bar(f.svg, x(i) - bw / 2, up ? yv : zero, bw, Math.abs(zero - yv), 4, g.free ? S2 : S1, !up);
+    const lbl = el("text", { x: x(i), y: up ? yv - 5 : yv + 13, "text-anchor": "middle", class: "lbl" }, f.svg);
+    lbl.textContent = metric === "total" ? fmtHM(g.v) : metric === "bed" ? signed(g.v) : fmtInt(g.v);
+    const h = el("rect", { x: f.m.l + slot * i, y: 0, width: slot, height: f.H, fill: "transparent" }, f.svg);
+    const on = () => showTip(f, `<b>${g.label}</b>` + row(null, "平均", cfg.fmt(g.v)) + row(null, "样本", g.count + " 晚"), x(i), f.m.t + 10);
+    h.addEventListener("pointerenter", on); h.addEventListener("pointerdown", on);
+    h.addEventListener("pointerleave", () => hideTip(f));
+  });
+}
+
+/* ---------- 标签分析 ---------- */
+function renderTags(all) {
+  const host = $("tags");
+  const names = [...new Set(all.flatMap((d) => d.tags))];
+  const metrics = [["sleepScore", "睡眠分", 0], ["ready", "准备度", 0], ["hrv", "HRV", 0], ["deep", "深睡", 0]];
+  const rows = names.map((name) => {
+    const w = all.filter((d) => d.tags.includes(name)), wo = all.filter((d) => !d.tags.includes(name));
+    const r = { name, n: w.length };
+    for (const [k] of metrics) { r[k] = mean(w.map((d) => d[k])); r[k + "_d"] = r[k] != null && mean(wo.map((d) => d[k])) != null ? r[k] - mean(wo.map((d) => d[k])) : null; }
+    return r;
+  }).filter((r) => r.n >= 3).sort((a, b) => (a.sleepScore_d ?? 0) - (b.sleepScore_d ?? 0));
+  if (!rows.length) {
+    host.innerHTML = `<div class="empty">${names.length ? "标签出现次数还不够，每个标签至少要 3 次" : "还没有标签。在 Oura App 里给咖啡、运动、晚餐等打标签后，这里会显示它们对睡眠的影响"}</div>`;
+    return;
+  }
+  const maxAbs = Math.max(4, ...rows.map((r) => Math.abs(r.sleepScore_d || 0)));
+  const POS = css("--pos"), NEG = css("--neg");
+  const deltaBar = (v) => {
+    const w = 44, half = w / 2, len = Math.min(half, (Math.abs(v) / maxAbs) * half);
+    return `<svg width="${w}" height="10" aria-hidden="true"><line x1="${half}" x2="${half}" y1="0" y2="10" stroke="${css("--axis")}"/>` +
+      `<rect x="${v >= 0 ? half : half - len}" y="2" width="${len}" height="6" rx="2" fill="${v >= 0 ? POS : NEG}"/></svg>`;
+  };
+  host.innerHTML = `<table class="tagtable"><thead><tr><th>标签</th><th>次数</th>${metrics.map((m) => `<th>${m[1]}</th>`).join("")}</tr></thead><tbody>` +
+    rows.map((r) => `<tr><td>${r.name}</td><td>${r.n}</td>` + metrics.map(([k]) => {
+      const dv = r[k + "_d"];
+      const txt = k === "deep" ? (dv == null ? "–" : signed(dv * 60, 0, " 分")) : signed(dv, 1);
+      return `<td><span class="delta">${k === "sleepScore" && dv != null ? deltaBar(dv) : ""}${txt}</span></td>`;
+    }).join("") + "</tr>").join("") +
+    `</tbody></table><p class="desc" style="margin-top:8px">数字是"有这个标签的晚上"减去"没有的晚上"的平均差。样本少时只能当参考，不代表因果关系。</p>`;
+}
+
+/* ---------- 睡眠日历 ---------- */
+function renderCalendar(all) {
+  const host = $("c-cal");
+  const Q = ["--q1", "--q2", "--q3", "--q4", "--q5"].map(css);
+  const bins = ["< 60", "60–69", "70–79", "80–89", "≥ 90"];
+  const level = (v) => v == null ? -1 : v < 60 ? 0 : v < 70 ? 1 : v < 80 ? 2 : v < 90 ? 3 : 4;
+  legend("lg-cal", [[css("--grid"), "无数据"], ...Q.map((c, i) => [c, bins[i]])]);
+  if (!all.length) return emptyChart(host);
+  host.innerHTML = "";
+  const byDay = new Map(all.map((d) => [d.day, d]));
+  const last = all[all.length - 1].day;
+  // 起点：对齐到周一，最多 53 周
+  let start = all[0].day;
+  const minStart = addDays(last, -7 * 53 + 1);
+  if (start < minStart) start = minStart;
+  start = addDays(start, -((dow(start) + 6) % 7));
+  const nW = Math.max(1, Math.floor((Date.parse(last) - Date.parse(start)) / 864e5 / 7) + 1);
+  const avail = Math.max(host.clientWidth, 280) - 30;
+  const cell = Math.max(11, Math.min(18, Math.floor(avail / nW) - 3)), gap = 3;
+  const W = 30 + nW * (cell + gap), H = 20 + 7 * (cell + gap);
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img", "aria-label": "睡眠分数日历" }, host);
+  svg.style.width = W + "px";
+  const tip = document.createElement("div"); tip.className = "tip"; host.appendChild(tip);
+  ["一", "", "三", "", "五", "", "日"].forEach((t, r) => { if (t) { const tx = el("text", { x: 0, y: 20 + r * (cell + gap) + cell - 2 }, svg); tx.textContent = t; } });
+  let lastMonth = "";
+  for (let w = 0; w < nW; w++) {
+    for (let r = 0; r < 7; r++) {
+      const day = addDays(start, w * 7 + r);
+      if (day > last) continue;
+      const mo = day.slice(5, 7);
+      if (r === 0 && mo !== lastMonth) { const t = el("text", { x: 30 + w * (cell + gap), y: 11 }, svg); t.textContent = `${+mo}月`; lastMonth = mo; }
+      const d = byDay.get(day), lv = level(d?.sleepScore);
+      const cx = 30 + w * (cell + gap), cy = 20 + r * (cell + gap);
+      const rc = el("rect", { x: cx, y: cy, width: cell, height: cell, rx: 3, fill: lv < 0 ? css("--grid") : Q[lv], class: d ? "clickable" : "" }, svg);
+      if (state.sel === day) rc.setAttribute("stroke", css("--ink")), rc.setAttribute("stroke-width", 1.5);
+      const on = () => {
+        tip.innerHTML = `<b>${day}（${WEEK[dow(day)]}）</b>` + (d ? row(null, "睡眠分数", fmtInt(d.sleepScore)) + row(null, "睡眠时长", fmtHM(d.total)) + (d.doc ? `<div class="hint">点击查看当晚详情</div>` : "") : "无数据");
+        tip.style.opacity = 1;
+        const hostW = host.clientWidth, tw = tip.offsetWidth;
+        let left = cx - host.scrollLeft + cell + 8; if (left + tw > hostW) left = cx - host.scrollLeft - tw - 8;
+        tip.style.left = Math.max(0, left) + "px"; tip.style.top = Math.max(0, cy - 8) + "px";
+      };
+      rc.addEventListener("pointerenter", on); rc.addEventListener("pointerdown", on);
+      rc.addEventListener("pointerleave", () => { tip.style.opacity = 0; });
+      if (d) rc.addEventListener("click", () => selectDay(day));
+    }
+  }
+  host.scrollLeft = host.scrollWidth;
+}
+
+/* ---------- 异常提醒 ---------- */
+function renderAlerts(all) {
+  const host = $("alerts");
+  const out = [];
+  const recent = all.slice(-3);
+  const hist = all.slice(-33, -3);
+  const temps = recent.map((d) => d.temp).filter((v) => v != null);
+  const hotDays = temps.filter((v) => v >= 0.4).length;
+  if (hotDays >= 2) out.push(["体温连续偏高", `最近 3 天中有 ${hotDays} 天体温偏差在 +0.4°C 以上（最高 ${signed(Math.max(...temps), 2, "°C")}）。可能是快要生病、疲劳或饮酒，留意身体状况。`]);
+  const check = (key, label, unit, dir) => {
+    const base = clean(hist.map((d) => d[key]));
+    const cur = mean(recent.map((d) => d[key]));
+    if (base.length < 14 || cur == null) return;
+    const m = mean(base), s = sd(base);
+    if (dir < 0 ? cur < m - s : cur > m + s) {
+      out.push([`${label}${dir < 0 ? "明显下降" : "明显升高"}`, `最近 3 晚平均 ${Math.round(cur)} ${unit}，你过去 30 天的正常范围是 ${Math.round(m - s)}–${Math.round(m + s)} ${unit}。${dir < 0 ? "身体可能还没恢复好，今天可以安排轻松一点。" : "常见原因有压力大、睡眠不足、生病前兆或睡前饮酒。"}`]);
+    }
+  };
+  check("hrv", "HRV ", "ms", -1);
+  check("rhr", "静息心率", "bpm", +1);
+  const icon = `<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 21h20L12 3Z" fill="${css("--warn")}"/><path d="M12 10v5" stroke="#0b0b0b" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="18" r="1.2" fill="#0b0b0b"/></svg>`;
+  host.innerHTML = out.map(([t, d]) => `<div class="alert" role="status">${icon}<div><b>注意：${t}</b><span>${d}</span></div></div>`).join("");
+  host.classList.toggle("hidden", !out.length);
+}
+
+/* ---------- 单日详情 ---------- */
+const STAGES = { 1: ["深睡", "--s1", 3], 2: ["浅睡", "--s3", 2], 3: ["REM", "--s2", 1], 4: ["清醒", "--s4", 0] };
+function renderDetail() {
+  const all = state.data.days;
+  const withSleep = all.filter((d) => d.doc);
+  if (!withSleep.length) { $("d-date").textContent = "–"; emptyChart($("c-detail"), "还没有睡眠记录"); $("d-stats").innerHTML = ""; $("d-tags").innerHTML = ""; $("lg-detail").innerHTML = ""; return; }
+  let idx = withSleep.findIndex((d) => d.day === state.sel);
+  if (idx < 0) { idx = withSleep.length - 1; state.sel = withSleep[idx].day; }
+  const d = withSleep[idx], s = d.doc;
+  $("d-date").textContent = `${fmtDay(d.day)} ${WEEK[d.wakeDow]}`;
+  $("d-prev").disabled = idx === 0; $("d-next").disabled = idx === withSleep.length - 1;
+  $("d-prev").onclick = () => { state.sel = withSleep[idx - 1].day; renderDetail(); renderCalendar(all); };
+  $("d-next").onclick = () => { state.sel = withSleep[idx + 1].day; renderDetail(); renderCalendar(all); };
+  $("d-tags").innerHTML = d.tags.map((t) => `<span class="chip">${t}</span>`).join("");
+  $("d-stats").innerHTML = [
+    ["入睡 → 醒来", `${fmtClock(d.bed)} → ${fmtClock(d.wake)}`, `在床 ${fmtHM((s.time_in_bed || 0) / 3600 || (d.wake - d.bed) / 60)}`],
+    ["睡眠时长", fmtHM(d.total), d.eff != null ? `效率 ${d.eff}%` : ""],
+    ["睡眠分 / 准备度", `${fmtInt(d.sleepScore)} / ${fmtInt(d.ready)}`, d.temp != null ? `体温偏差 ${signed(d.temp, 2, "°C")}` : ""],
+    ["HRV", d.hrv == null ? "–" : d.hrv + " ms", d.hrv_m != null ? `基线 ${Math.round(d.hrv_m)} ms` : ""],
+    ["心率", `${fmtInt(d.rhr)} bpm`, d.avgHr != null ? `最低 · 平均 ${Math.round(d.avgHr)}` : "最低"],
+  ].map(([k, v, x]) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${x || "&nbsp;"}</div></div>`).join("");
+
+  const phases = s.sleep_phase_5_min || "";
+  const hr = s.heart_rate?.items || [];
+  const host = $("c-detail");
+  legend("lg-detail", [["--s1", "深睡"], ["--s3", "浅睡"], ["--s2", "REM"], ["--s4", "清醒"]].map(([v, n]) => [css(v), n]).concat(hr.length ? [[css("--ink-2"), "心率", "dot"]] : []));
+  if (!phases && !hr.length) return emptyChart(host, "这一晚没有详细的阶段和心率数据");
+
+  host.innerHTML = "";
+  const W = Math.max(host.clientWidth, 280), hypH = 110, hrH = 150, gapH = 22, m = { l: 44, r: 12, t: 6, b: 24 };
+  const H = m.t + hypH + gapH + hrH + m.b;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "睡眠阶段和夜间心率" }, host);
+  const tip = document.createElement("div"); tip.className = "tip"; host.appendChild(tip);
+  const f = { svg, tip, W, H, host, m };
+  const startMin = d.bed;
+  const startHr = s.heart_rate?.timestamp ? (() => { const v = clockMin(s.heart_rate.timestamp); return v < 12 * 60 ? v + 1440 : v; })() : startMin;
+  const interval = (s.heart_rate?.interval || 300) / 60;
+  const endMin = Math.max(d.wake ?? 0, startMin + phases.length * 5, startHr + hr.length * interval);
+  const iw = W - m.l - m.r;
+  const x = (t) => m.l + ((t - startMin) / (endMin - startMin || 1)) * iw;
+  const hourStart = Math.ceil(startMin / 60) * 60;
+  const everyH = Math.max(1, Math.ceil(((endMin - startMin) / 60) / Math.max(1, Math.floor(iw / 48))));
+  for (let t = hourStart, k = 0; t <= endMin; t += 60, k++) {
+    if (k % everyH) continue;
+    el("line", { x1: x(t), x2: x(t), y1: m.t, y2: H - m.b, stroke: css("--grid") }, svg);
+    const tx = el("text", { x: x(t), y: H - 6, "text-anchor": "middle" }, svg); tx.textContent = fmtClock(t);
+  }
+  // 睡眠阶段（经典 hypnogram：清醒在上、深睡在下）
+  const laneH = hypH / 4, laneY = (lv) => m.t + lv * laneH;
+  [["清醒", 0], ["REM", 1], ["浅睡", 2], ["深睡", 3]].forEach(([n, lv]) => {
+    const t = el("text", { x: m.l - 6, y: laneY(lv) + laneH / 2 + 4, "text-anchor": "end" }, svg); t.textContent = n;
+  });
+  let i0 = 0;
+  for (let i = 1; i <= phases.length; i++) {
+    if (i < phases.length && phases[i] === phases[i0]) continue;
+    const st = STAGES[phases[i0]];
+    if (st) {
+      const x1 = x(startMin + i0 * 5), x2 = x(startMin + i * 5);
+      el("rect", { x: x1, y: laneY(st[2]) + 3, width: Math.max(1, x2 - x1 - 1), height: laneH - 6, rx: 2, fill: css(st[1]) }, svg);
+    }
+    i0 = i;
+  }
+  // 心率
+  const hy0 = m.t + hypH + gapH;
+  const hv = clean(hr);
+  let yHr = null;
+  if (hv.length) {
+    const ticks = niceTicks(Math.min(...hv) - 2, Math.max(...hv) + 2, 3);
+    const lo = ticks[0], hi = ticks[ticks.length - 1];
+    yHr = (v) => hy0 + hrH - ((v - lo) / (hi - lo)) * hrH;
+    for (const v of ticks) {
+      el("line", { x1: m.l, x2: W - m.r, y1: yHr(v), y2: yHr(v), stroke: v === lo ? css("--axis") : css("--grid") }, svg);
+      const t = el("text", { x: m.l - 6, y: yHr(v) + 3.5, "text-anchor": "end" }, svg); t.textContent = v;
+    }
+    let p = "", pen = false;
+    hr.forEach((v, i) => {
+      if (v == null) { pen = false; return; }
+      p += `${pen ? "L" : "M"}${x(startHr + i * interval).toFixed(1)},${yHr(v).toFixed(1)}`; pen = true;
+    });
+    el("path", { d: p, fill: "none", stroke: css("--ink-2"), "stroke-width": 2, "stroke-linejoin": "round" }, svg);
+    const t = el("text", { x: m.l, y: hy0 - 6, class: "lbl" }, svg); t.textContent = "心率（bpm）";
+  }
+  const cross = el("line", { y1: m.t, y2: H - m.b, stroke: css("--axis"), opacity: 0 }, svg);
+  const dot = el("circle", { r: 4.5, fill: css("--ink-2"), stroke: css("--surface"), "stroke-width": 2, opacity: 0 }, svg);
+  const hit = el("rect", { x: m.l, y: 0, width: iw, height: H, fill: "transparent" }, svg);
+  const move = (ev) => {
+    const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * (W / r.width);
+    const t = startMin + ((px - m.l) / iw) * (endMin - startMin);
+    const pi = Math.floor((t - startMin) / 5), hi2 = Math.round((t - startHr) / interval);
+    const st = STAGES[phases[pi]], v = hr[hi2];
+    cross.setAttribute("x1", px); cross.setAttribute("x2", px); cross.setAttribute("opacity", 1);
+    if (v != null && yHr) { dot.setAttribute("cx", x(startHr + hi2 * interval)); dot.setAttribute("cy", yHr(v)); dot.setAttribute("opacity", 1); } else dot.setAttribute("opacity", 0);
+    showTip(f, `<b>${fmtClock(t)}</b>` + row(st ? css(st[1]) : null, "阶段", st ? st[0] : "–") + row(null, "心率", v == null ? "–" : v + " bpm"), px, m.t + 10);
+  };
+  hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move);
+  hit.addEventListener("pointerleave", () => { cross.setAttribute("opacity", 0); dot.setAttribute("opacity", 0); hideTip(f); });
+}
+
+/* ---------- 主渲染 ---------- */
 function render() {
   const all = state.data.days;
   const days = all.slice(-state.days);
   const prev = all.slice(-state.days * 2, -state.days);
   const S1 = css("--s1"), S2 = css("--s2"), S3 = css("--s3");
 
-  // 数据量提示
   const note = $("note");
   if (!all.length) { note.textContent = "还没有任何数据。戴着戒指睡一晚，同步后重新运行 fetch_oura.py。"; note.classList.remove("hidden"); }
-  else if (state.src === "real" && all.length < 14) { note.textContent = `目前只有 ${all.length} 天数据。准备度、HRV 等指标需要一到两周建立基线，趋势会越来越准。`; note.classList.remove("hidden"); }
+  else if (state.src === "real" && all.length < 14) { note.textContent = `目前只有 ${all.length} 天数据。基线、异常提醒和星期对比需要一到两周的数据，趋势会越来越准。`; note.classList.remove("hidden"); }
   else if (state.src === "demo" && state.missingReal && isLocal) { note.textContent = "没有找到真实数据，先显示演示数据。在项目目录运行 python3 scripts/fetch_oura.py 后刷新页面。"; note.classList.remove("hidden"); }
   else note.classList.add("hidden");
 
-  // 指标卡
+  renderAlerts(all);
+
   const tiles = [
     ["平均睡眠分数", "sleepScore", fmtInt],
     ["平均准备度", "ready", fmtInt],
@@ -417,13 +891,13 @@ function render() {
     ["日均步数", "steps", fmtInt],
   ];
   $("tiles").innerHTML = tiles.map(([k, key, fmt]) => {
-    const cur = avg(days.map((d) => d[key])), old = avg(prev.map((d) => d[key]));
+    const cur = mean(days.map((d) => d[key])), old = mean(prev.map((d) => d[key]));
     let delta = "";
     if (cur != null && old != null && prev.length >= state.days / 2) {
       const diff = cur - old;
       delta = key === "total" ? `${diff >= 0 ? "+" : "−"}${fmtHM(Math.abs(diff))}`
         : key === "bed" ? `${diff >= 0 ? "晚" : "早"} ${Math.round(Math.abs(diff))} 分钟`
-        : `${diff >= 0 ? "+" : "−"}${fmtInt(Math.abs(diff))}`;
+        : signed(diff);
       delta = `比前 ${state.days} 天 ${delta}`;
     }
     return `<div class="tile"><div class="k">${k}</div><div class="v">${fmt(cur)}</div><div class="d">${delta || "&nbsp;"}</div></div>`;
@@ -436,6 +910,13 @@ function render() {
     { name: "活动", key: "act", color: S3 },
   ], { yMin: 40, yMax: 100, ticks: [40, 60, 80, 100], h: 240 });
 
+  legend("lg-base", [[S1, "当天数值"], [S1, "个人基线（均值 ±1 标准差）", "band"], [S1, "超出基线", "dot"]]);
+  lineChart($("c-ready"), days, [{ name: "准备度", key: "ready", color: S1 }], { band: "ready", h: 180 });
+  lineChart($("c-hrv"), days, [{ name: "HRV", key: "hrv", color: S1, fmt: (v) => Math.round(v) + " ms" }], { band: "hrv", h: 180 });
+  lineChart($("c-rhr"), days, [{ name: "最低心率", key: "rhr", color: S1, fmt: (v) => Math.round(v) + " bpm" }], { band: "rhr", h: 180 });
+
+  renderRegularity(days);
+
   legend("lg-stages", [[S1, "深睡"], [S2, "REM"], [S3, "浅睡"]]);
   barChart($("c-stages"), days, [
     { name: "深睡", key: "deep", color: S1, fmt: fmtHM },
@@ -446,23 +927,25 @@ function render() {
   const pts = days.filter((d) => d.bed != null && d.ready != null).map((d) => ({ x: d.bed, y: d.ready, day: d.day }));
   scatterChart($("c-bedtime"), pts, { color: S1 });
 
-  lineChart($("c-hrv"), days, [{ name: "HRV", key: "hrv", color: S1, fmt: (v) => v + " ms" }], {});
-  lineChart($("c-rhr"), days, [{ name: "最低心率", key: "rhr", color: S1, fmt: (v) => v + " bpm" }], {});
-  barChart($("c-steps"), days, [{ name: "步数", key: "steps", color: S1 }], { yFmt: (v) => v >= 1000 ? v / 1000 + "k" : v });
+  renderWeekday(days);
+  renderTags(all);
 
+  barChart($("c-steps"), days, [{ name: "步数", key: "steps", color: S1 }], { yFmt: (v) => v >= 1000 ? v / 1000 + "k" : v });
   legend("lg-stress", [[S2, "高压力"], [S1, "恢复"]]);
   barChart($("c-stress"), days, [
     { name: "高压力", key: "stress", color: S2, fmt: (v) => Math.round(v) + " 分钟" },
     { name: "恢复", key: "recovery", color: S1, fmt: (v) => Math.round(v) + " 分钟" },
   ], { yFmt: (v) => v + "m" });
 
-  // 数据表
+  renderCalendar(all);
+  renderDetail();
+
   const cols = [["日期", (d) => d.day], ["睡眠分", (d) => fmtInt(d.sleepScore)], ["准备度", (d) => fmtInt(d.ready)], ["活动分", (d) => fmtInt(d.act)],
-    ["入睡", (d) => fmtClock(d.bed)], ["睡眠时长", (d) => fmtHM(d.total)], ["深睡", (d) => fmtHM(d.deep)], ["REM", (d) => fmtHM(d.rem)],
+    ["入睡", (d) => fmtClock(d.bed)], ["醒来", (d) => fmtClock(d.wake)], ["睡眠时长", (d) => fmtHM(d.total)], ["深睡", (d) => fmtHM(d.deep)], ["REM", (d) => fmtHM(d.rem)],
     ["HRV", (d) => fmtInt(d.hrv)], ["最低心率", (d) => fmtInt(d.rhr)], ["体温偏差", (d) => d.temp == null ? "–" : d.temp.toFixed(2)],
-    ["步数", (d) => fmtInt(d.steps)], ["高压力(分)", (d) => fmtInt(d.stress)], ["恢复(分)", (d) => fmtInt(d.recovery)]];
+    ["步数", (d) => fmtInt(d.steps)], ["高压力(分)", (d) => fmtInt(d.stress)], ["恢复(分)", (d) => fmtInt(d.recovery)], ["标签", (d) => d.tags.join("、") || "–"]];
   $("table").innerHTML = `<thead><tr>${cols.map((c) => `<th>${c[0]}</th>`).join("")}</tr></thead><tbody>` +
-    days.slice().reverse().map((d) => `<tr>${cols.map((c) => `<td>${c[1](d)}</td>`).join("")}</tr>`).join("") + "</tbody>";
+    days.slice().reverse().map((d) => `<tr data-day="${d.day}">${cols.map((c) => `<td>${c[1](d)}</td>`).join("")}</tr>`).join("") + "</tbody>";
 }
 
 function setPressed(groupId, attr, val) {
@@ -480,7 +963,7 @@ async function useSource(src) {
     }
     $("sub").textContent = "数据加载失败：" + e.message; return;
   }
-  state.src = src;
+  state.src = src; state.sel = null;
   state.data = { days: buildDays(raw), meta: raw.meta };
   setPressed("source", "src", src);
   const badge = $("badge");
@@ -496,9 +979,12 @@ $("range").addEventListener("click", (e) => {
   const b = e.target.closest("button"); if (!b) return;
   state.days = +b.dataset.days; setPressed("range", "days", state.days); if (state.data) render();
 });
-$("source").addEventListener("click", (e) => {
-  const b = e.target.closest("button"); if (b) useSource(b.dataset.src);
+$("source").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) useSource(b.dataset.src); });
+$("wk-metric").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  state.wk = b.dataset.m; setPressed("wk-metric", "m", state.wk); renderWeekday(state.data.days.slice(-state.days));
 });
+$("table").addEventListener("click", (e) => { const tr = e.target.closest("tr[data-day]"); if (tr) selectDay(tr.dataset.day); });
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => state.data && render(), 120); });
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => state.data && render());
 

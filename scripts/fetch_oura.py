@@ -23,7 +23,7 @@ OUT = ROOT / "docs" / "data" / "real"
 API = "https://api.ouraring.com/v2/usercollection/"
 
 # 网页用到的数据类型
-TYPES = ["daily_sleep", "sleep", "daily_readiness", "daily_activity", "daily_stress"]
+TYPES = ["daily_sleep", "sleep", "daily_readiness", "daily_activity", "daily_stress", "enhanced_tag"]
 
 
 def load_token() -> str:
